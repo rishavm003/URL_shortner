@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: nanolink-url-shortener
+    name: nnlk
     runtime: python
     plan: free
     buildCommand: pip install -r requirements.txt

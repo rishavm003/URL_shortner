@@ -420,8 +420,14 @@
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.detail || 'Failed to shorten URL');
+                    let errorMessage = 'Failed to shorten URL';
+                    try {
+                        const errorData = await response.json();
+                        errorMessage = errorData.detail || errorMessage;
+                    } catch (e) {
+                        errorMessage = await response.text();
+                    }
+                    throw new Error(errorMessage);
                 }
 
                 const data = await response.json();
