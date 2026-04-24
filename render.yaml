@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: nanolink-url-shortener
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nanolink-db
+          property: connectionString
+
+databases:
+  - name: nanolink-db
+    plan: free

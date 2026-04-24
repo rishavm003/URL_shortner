@@ -13,7 +13,10 @@ def shorten_url(url_in: URLCreate, db: Session = Depends(get_db)):
     if url_in.custom_id:
         existing_custom = db.query(URL).filter(URL.short_id == url_in.custom_id).first()
         if existing_custom:
-            raise HTTPException(status_code=400, detail="Custom ID already taken")
+            # If same URL, just return the existing entry
+            if existing_custom.original_url == str(url_in.original_url):
+                return existing_custom
+            raise HTTPException(status_code=400, detail="Custom ID already taken by another URL")
         short_id = url_in.custom_id
     else:
         # Check if URL already exists
