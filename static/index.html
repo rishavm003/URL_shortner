@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NanoLink | Premium URL Shortener</title>
+    <meta name="description" content="A fast, secure, and beautiful URL shortener for your daily needs.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+            --error: #ef4444;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(16, 185, 129, 0.1) 0%, transparent 40%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 2rem;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 4rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #818cf8, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .main-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            position: relative;
+        }
+
+        input {
+            flex: 1;
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.2rem 1.5rem;
+            color: var(--text);
+            font-size: 1.1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 1.2rem 2.5rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .result-area {
+            margin-top: 2rem;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .shortened-url {
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 1.2rem;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: var(--glass);
+            padding: 0.8rem 1.5rem;
+            font-size: 0.9rem;
+        }
+
+        .copy-btn.copied {
+            background: var(--accent);
+            color: white;
+        }
+
+        .history {
+            margin-top: 4rem;
+            width: 100%;
+            animation: fadeIn 1s ease-out 0.5s backwards;
+        }
+
+        .history h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .history-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .history-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease;
+        }
+
+        .history-item:hover {
+            transform: translateX(5px);
+            border-color: var(--primary);
+        }
+
+        .history-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .history-original {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .history-short {
+            color: var(--text);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .history-stats {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-badge {
+            background: var(--glass);
+            padding: 0.4rem 0.8rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .delete-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            padding: 0.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            background: var(--error);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 640px) {
+            h1 { font-size: 3rem; }
+            .input-group { flex-direction: column; }
+            button { width: 100%; }
+            .main-card { padding: 1.5rem; }
+            .history-item { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        }
+
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>NanoLink</h1>
+            <p class="subtitle">Elevate your links. Clean, fast, and powerful URL shortening for the modern web.</p>
+        </header>
+
+        <div class="main-card">
+            <div class="input-group">
+                <input type="url" id="urlInput" placeholder="Paste your long link here..." required>
+                <button id="shortenBtn">
+                    <span id="btnText">Shorten Now</span>
+                    <div class="loader" id="loader"></div>
+                </button>
+            </div>
+            <div class="input-group" style="margin-top: 1rem;">
+                <input type="text" id="customIdInput" placeholder="Custom ID (optional, e.g. my-link)" maxlength="20">
+            </div>
+
+            <div class="result-area" id="resultArea">
+                <div class="result-card">
+                    <a href="#" class="shortened-url" id="shortenedUrl" target="_blank">nanolink.it/xyz123</a>
+                    <button class="copy-btn" id="copyBtn">Copy Link</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="history" id="historySection" style="display: none;">
+            <h2>Recent Links</h2>
+            <div class="history-list" id="historyList">
+                <!-- History items will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BRAND_DOMAIN = 'nanolink';
+        const urlInput = document.getElementById('urlInput');
+        const customIdInput = document.getElementById('customIdInput');
+        const shortenBtn = document.getElementById('shortenBtn');
+        const btnText = document.getElementById('btnText');
+        const loader = document.getElementById('loader');
+        const resultArea = document.getElementById('resultArea');
+        const shortenedUrl = document.getElementById('shortenedUrl');
+        const copyBtn = document.getElementById('copyBtn');
+        const historySection = document.getElementById('historySection');
+        const historyList = document.getElementById('historyList');
+
+        // Load history from localStorage
+        let history = JSON.parse(localStorage.getItem('nanolink_history') || '[]');
+
+        async function updateHistoryUI() {
+            if (history.length === 0) {
+                historySection.style.display = 'none';
+                return;
+            }
+
+            historySection.style.display = 'block';
+            
+            // Try to fetch latest stats for history items
+            const updatedHistory = await Promise.all(history.slice(0, 5).map(async (item) => {
+                try {
+                    const res = await fetch(`/stats/${item.short_id}`);
+                    if (res.ok) return await res.json();
+                } catch (e) { console.error(e); }
+                return item;
+            }));
+
+            historyList.innerHTML = updatedHistory.map(item => `
+                <div class="history-item">
+                    <div class="history-info">
+                        <a href="/${item.short_id}" class="history-short" target="_blank">${BRAND_DOMAIN}/${item.short_id}</a>
+                        <span class="history-original" title="${item.original_url}">${item.original_url}</span>
+                    </div>
+                    <div class="history-stats">
+                        <span class="stat-badge">${item.clicks || 0} clicks</span>
+                        <span class="stat-badge">${new Date(item.created_at).toLocaleDateString()}</span>
+                        <button class="delete-btn" onclick="deleteHistoryItem('${item.short_id}')" title="Delete">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update localStorage with fresh stats
+            localStorage.setItem('nanolink_history', JSON.stringify(updatedHistory));
+        }
+
+        function deleteHistoryItem(shortId) {
+            history = history.filter(item => item.short_id !== shortId);
+            localStorage.setItem('nanolink_history', JSON.stringify(history));
+            updateHistoryUI();
+        }
+
+        updateHistoryUI();
+
+        shortenBtn.addEventListener('click', async () => {
+            const url = urlInput.value.trim();
+            const customId = customIdInput.value.trim();
+            if (!url) return;
+
+            // Simple validation
+            if (!url.startsWith('http')) {
+                alert('Please enter a valid URL starting with http:// or https://');
+                return;
+            }
+
+            // UI Loading State
+            shortenBtn.disabled = true;
+            btnText.style.display = 'none';
+            loader.style.display = 'block';
+            resultArea.style.display = 'none';
+
+            try {
+                const response = await fetch('/shorten', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        original_url: url,
+                        custom_id: customId || null
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.detail || 'Failed to shorten URL');
+                }
+
+                const data = await response.json();
+                
+                const realUrl = `${window.location.protocol}//${window.location.host}/${data.short_id}`;
+                const displayUrl = `${BRAND_DOMAIN}/${data.short_id}`;
+                shortenedUrl.innerText = displayUrl;
+                shortenedUrl.href = realUrl;
+                shortenedUrl.dataset.realUrl = realUrl;
+                
+                resultArea.style.display = 'block';
+                customIdInput.value = ''; // Clear custom id field
+
+                // Add to history
+                const exists = history.findIndex(h => h.short_id === data.short_id);
+                if (exists !== -1) history.splice(exists, 1);
+                history.unshift(data);
+                localStorage.setItem('nanolink_history', JSON.stringify(history));
+                updateHistoryUI();
+
+            } catch (error) {
+                console.error(error);
+                alert(error.message);
+            } finally {
+                shortenBtn.disabled = false;
+                btnText.style.display = 'block';
+                loader.style.display = 'none';
+            }
+        });
+
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(shortenedUrl.dataset.realUrl || shortenedUrl.href);
+            copyBtn.innerText = 'Copied!';
+            copyBtn.classList.add('copied');
+            setTimeout(() => {
+                copyBtn.innerText = 'Copy Link';
+                copyBtn.classList.remove('copied');
+            }, 2000);
+        });
+
+        // Enter key support
+        urlInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') shortenBtn.click();
+        });
+    </script>
+</body>
+</html>
