@@ -332,9 +332,7 @@
     </div>
 
     <script>
-        const BRAND_DOMAIN = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? window.location.host 
-            : 'nnlk.onrender.com';
+        const BRAND_DOMAIN = window.location.host;
         const urlInput = document.getElementById('urlInput');
         const customIdInput = document.getElementById('customIdInput');
         const shortenBtn = document.getElementById('shortenBtn');
