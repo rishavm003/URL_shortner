@@ -11,7 +11,10 @@ router = APIRouter()
 def shorten_url(url_in: URLCreate, db: Session = Depends(get_db)):
     # If custom_id is provided, check if it's already taken
     if url_in.custom_id:
-        existing_custom = db.query(URL).filter(URL.short_id == url_in.custom_id).first()
+        try:
+            existing_custom = db.query(URL).filter(URL.short_id == url_in.custom_id).first()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail="Database error during custom ID validation")
         if existing_custom:
             # If same URL, just return the existing entry
             if existing_custom.original_url == str(url_in.original_url):
@@ -29,23 +32,39 @@ def shorten_url(url_in: URLCreate, db: Session = Depends(get_db)):
         while db.query(URL).filter(URL.short_id == short_id).first():
             short_id = generate_short_id()
             
-    new_url = URL(original_url=str(url_in.original_url), short_id=short_id)
-    db.add(new_url)
-    db.commit()
-    db.refresh(new_url)
-    return new_url
+    try:
+        new_url = URL(original_url=str(url_in.original_url), short_id=short_id)
+        db.add(new_url)
+        db.commit()
+        db.refresh(new_url)
+        return new_url
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Database error while shortening: {str(e)}"
+        )
 
 @router.get("/{short_id}")
 def redirect_to_url(short_id: str, db: Session = Depends(get_db)):
+    # Ignore common browser requests that aren't short IDs
+    if short_id in ["favicon.ico", "robots.txt", "sitemap.xml"]:
+        raise HTTPException(status_code=404)
+        
     db_url = db.query(URL).filter(URL.short_id == short_id).first()
     if not db_url:
         raise HTTPException(status_code=404, detail="URL not found")
     
     # Increment clicks
-    db_url.clicks += 1
-    db.commit()
+    try:
+        db_url.clicks += 1
+        db.commit()
+    except Exception:
+        db.rollback()
+        # Still redirect even if click count update fails
+        pass
     
-    return RedirectResponse(url=db_url.original_url)
+    return RedirectResponse(url=db_url.original_url, status_code=status.HTTP_302_FOUND)
 
 @router.get("/stats/{short_id}", response_model=URLResponse)
 def get_url_stats(short_id: str, db: Session = Depends(get_db)):
